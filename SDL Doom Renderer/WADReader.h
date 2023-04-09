@@ -15,9 +15,15 @@ public:
 
 	uint32_t read4Bytes(const uint8_t* pWADData, int offset);							// Reads 4 bytes of data from the file and return it
 
-	void readHeaderData(const uint8_t* pWADData, int offset, Header& header);			// Read data from pWADData into a header
+	void readHeaderData(const uint8_t* pWADData, int offset, Header& header);			// Reads data from pWADData into a header
 	
-	void readDirectoryData(const uint8_t* pWADData, int offset, Directory& directory);	// Read data from pWADData into a directory
+	void readDirectoryData(const uint8_t* pWADData, int offset, Directory& directory);	// Reads data from pWADData into a directory
+
+	void readVertexData(const uint8_t* pWADData, int offset, Vertex& vertex);			// Reads data form pWADData into a vertex
+
+	void readLinedefData(const uint8_t* pWADData, int offset, Linedef& linedef);		// Reads data from PWADData into a linedef
+
+	void readThingData(const uint8_t* pWADData, int offset, Thing& thing);
 };
 
 #endif

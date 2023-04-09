@@ -1,6 +1,7 @@
 /*
 * Created 7:56 PM on 3/24/2023
 */
+
 #include <iostream>
 #include "SDL.h"
 #include "SDL_image.h"
@@ -10,7 +11,9 @@
 #include <sstream>
 #include"WADLoader.h"
 #include "DataTypes.h"
+#include "Game.h"
 
+/*
 const int WIDTH{ 600 };		// The width of the screen where the 3d rendering occurs
 const int HEIGHT{ 460 };	// The height of the whole window
 
@@ -31,8 +34,6 @@ double PREVIOUS_TIME{};
 double CURRENT_TIME{};
 double DELTA_TIME{};
 double FPS{};
-
-
 
 struct Wall
 {
@@ -169,7 +170,7 @@ void renderScene()
 					wall.a.x = (wall.a.x * wall.b.y - wall.b.x * wall.a.y) / (wall.b.y - wall.a.y);	// Calculate the new x of the wall
 					wall.a.y = 0.01;	/* Technically, when the wall segment intersects the x - axis, the y - coordinate of the intersection is 0.
 										   However, if the y is 0, then I can't project the wall because of the divide by 0 error, so instead
-										   I make the y very small*/
+										   I make the y very small
 				}
 				else if (wall.b.y <= 0.0)
 				{
@@ -201,7 +202,7 @@ void renderScene()
 		SECTORS[c].dist = sqrt(avgX * avgX + avgY * avgY + avgZ * avgZ);
 		c++;
 	}
-}
+}*/
 
 int main(int argc, char* argv[])
 {
@@ -226,47 +227,7 @@ int main(int argc, char* argv[])
 	bool isRunning{ true };
 	SDL_Event ev{};
 
-	// Game loop
-	while (isRunning)
-	{
-		PREVIOUS_TIME = CURRENT_TIME;
-		CURRENT_TIME = SDL_GetTicks() / 1000.0;
-		DELTA_TIME = CURRENT_TIME - PREVIOUS_TIME;
-		FPS = 1.0 / DELTA_TIME;
-
-		// Output FPS and angle info
-		std::cout << "FPS: " << FPS << "        \n";
-
-		// Return the cursor in the console to twelve lines above so that old information is written over
-		std::cout << "\x1b[1F";
-
-		// Get keys
-		KEY_STATE = SDL_GetKeyboardState(NULL);
-
-		// Event loop
-		while (SDL_PollEvent(&ev) != 0)
-		{
-			switch (ev.type)
-			{
-				// Check if the exit button has been clicked
-				case SDL_QUIT:
-					isRunning = false;
-				break;
-
-				// Check for window events
-				case SDL_WINDOWEVENT:
-					// If the window is minimized, wait for events. Fixes memory spikes
-					if (ev.window.event == SDL_WINDOWEVENT_MINIMIZED)
-					{
-						while (SDL_WaitEvent(&ev))
-						{
-							if (ev.window.event == SDL_WINDOWEVENT_RESTORED)
-								break;
-						}
-					}
-				break;
-			}
-		}
+	
 
 		for (int i = 0; i < WIDTH * HEIGHT; i++)
 		{
@@ -357,11 +318,18 @@ int main(int argc, char* argv[])
 	IMG_Quit();
 	*/
 
-	WADLoader wad{ "DOOM.WAD" };
+	Game game{ 1280, 800 };
+	game.init();
 
-	wad.load();
+	while (game.isRunning())
+	{
+		game.handleInput();
+		game.update();
+		game.render();
+		game.delay(60);
+	}
 
-	delete[] SCREEN;
+	// delete[] SCREEN;
 
 	return 0;
 }
