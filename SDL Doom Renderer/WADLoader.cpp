@@ -42,6 +42,12 @@ bool WADLoader::loadMapData(Map& map)
 		return false;
 	}
 
+	if (!readMapNodes(map))
+	{
+		std::cerr << "Unable to load nodes for map " << map.getMapName() << '\n';
+		return false;
+	}
+
 	return true;
 }
 
@@ -92,24 +98,24 @@ bool WADLoader::readDirectories()
 
 	/*std::cout << header.WADType << '\n';
 	std::cout << header.DirectoryCount << '\n';
-	std::cout << header.DirectoryOffset << "\n\n";*/
+	std::cout << header.directoryOffset << "\n\n";*/
 
 	// Create a directory instance
 	Directory directory;
 
 	// Loop through every directory in the WAD file
-	for (int i{ 0 }; i < header.DirectoryCount; i++)
+	for (int i{ 0 }; i < header.directoryCount; i++)
 	{
-		// Read the data from the file into the directory. The offset is header.DirectoryOffset + i * 16 because the directories start at 
-		// header.DirectoryOffset, i is the number of the directory the loop is on, and 16 is the size of a directory in bytes
-		reader.readDirectoryData(m_WADData, header.DirectoryOffset + i * 16, directory);
+		// Read the data from the file into the directory. The offset is header.directoryOffset + i * 16 because the directories start at 
+		// header.directoryOffset, i is the number of the directory the loop is on, and 16 is the size of a directory in bytes
+		reader.readDirectoryData(m_WADData, header.directoryOffset + i * 16, directory);
 
 		// Add the directory to the list of directories
 		m_WADDirectories.push_back(directory);
 
-		/*std::cout << directory.LumpName << '\n';
-		std::cout << directory.LumpOffset << '\n';
-		std::cout << directory.LumpSize << "\n\n";*/
+		/*std::cout << directory.lumpName << '\n';
+		std::cout << directory.lumpOffset << '\n';
+		std::cout << directory.lumpSize << "\n\n";*/
 	}
 
 	return true;
@@ -120,7 +126,7 @@ int WADLoader::findMapIndex(Map& map)
 	std::string name{ map.getMapName() };
 	for (int i{ 0 }; i < m_WADDirectories.size(); i++)
 	{
-		if (m_WADDirectories[i].LumpName == name)
+		if (m_WADDirectories[i].lumpName == name)
 			return i;
 	}
 	return -1;
@@ -140,7 +146,7 @@ bool WADLoader::readMapVertices(Map& map)
 	Directory vertexDirectory{ m_WADDirectories[mapIndex + MapVertices] };
 
 	// Make sure the directory is the vertex directory
-	if (strcmp(vertexDirectory.LumpName, "VERTEXES") != 0)
+	if (strcmp(vertexDirectory.lumpName, "VERTEXES") != 0)
 		return false;
 
 	Vertex vertex{};
@@ -148,9 +154,9 @@ bool WADLoader::readMapVertices(Map& map)
 	int sizeOfVertex{ sizeof(Vertex) };
 
 	// Loop through all the data in the vertexes lump and add it to the map vector
-	for (int i{ 0 }; i < vertexDirectory.LumpSize; i += sizeOfVertex)		// Add 4 because the vertex datatype is 4 bytes
+	for (int i{ 0 }; i < vertexDirectory.lumpSize; i += sizeOfVertex)		// Add 4 because the vertex datatype is 4 bytes
 	{
-		reader.readVertexData(m_WADData, vertexDirectory.LumpOffset + i, vertex);
+		reader.readVertexData(m_WADData, vertexDirectory.lumpOffset + i, vertex);
 
 		// std::cout << "(" << vertex.x << ", " << vertex.y << ")\n";
 
@@ -173,7 +179,7 @@ bool WADLoader::readMapLinedefs(Map& map)
 	Directory linedefDirectory{ m_WADDirectories[mapIndex + MapLinedefs] };
 
 	// Make sure the directory is actually the linedef directory
-	if (strcmp(linedefDirectory.LumpName, "LINEDEFS") != 0)
+	if (strcmp(linedefDirectory.lumpName, "LINEDEFS") != 0)
 		return false;
 
 	Linedef linedef{};
@@ -181,17 +187,17 @@ bool WADLoader::readMapLinedefs(Map& map)
 	int sizeOfLinedef{ sizeof(Linedef) };
 
 	// Loop through all the data in the vertexes lump and add it to the map vector
-	for (int i{ 0 }; i < linedefDirectory.LumpSize; i += sizeOfLinedef)	// Add 14 because a linedef is 14 bytes
+	for (int i{ 0 }; i < linedefDirectory.lumpSize; i += sizeOfLinedef)	// Add 14 because a linedef is 14 bytes
 	{
-		reader.readLinedefData(m_WADData, linedefDirectory.LumpOffset + i, linedef);
+		reader.readLinedefData(m_WADData, linedefDirectory.lumpOffset + i, linedef);
 
-		/*std::cout << linedef.StartVertex << '\n';
-		std::cout << linedef.EndVertex << '\n';
-		std::cout << linedef.Flags << '\n';
-		std::cout << linedef.SpecialType << '\n';
-		std::cout << linedef.SectorTag << '\n';
-		std::cout << linedef.FrontSidedef << '\n';
-		std::cout << linedef.BackSidedef << "\n\n";*/
+		/*std::cout << linedef.startVertex << '\n';
+		std::cout << linedef.endVertex << '\n';
+		std::cout << linedef.flags << '\n';
+		std::cout << linedef.specialType << '\n';
+		std::cout << linedef.sectorTag << '\n';
+		std::cout << linedef.frontSidedef << '\n';
+		std::cout << linedef.backSidedef << "\n\n";*/
 
 		map.addLinedef(linedef);
 	}
@@ -210,24 +216,63 @@ bool WADLoader::readMapThings(Map& map)
 
 	Directory directory{ m_WADDirectories[mapIndex + MapThings] };
 
-	if (strcmp(directory.LumpName, "THINGS") != 0)
+	if (strcmp(directory.lumpName, "THINGS") != 0)
 		return false;
 
 	Thing thing;
 
 	int sizeOfThing{ sizeof(Thing) };
 
-	for (int i{ 0 }; i < directory.LumpSize; i += sizeOfThing)
+	for (int i{ 0 }; i < directory.lumpSize; i += sizeOfThing)
 	{
-		reader.readThingData(m_WADData, directory.LumpOffset + i, thing);
+		reader.readThingData(m_WADData, directory.lumpOffset + i, thing);
 
-		std::cout << thing.x << '\n';
+		/*std::cout << thing.x << '\n';
 		std::cout << thing.y << '\n';
 		std::cout << thing.a << '\n';
-		std::cout << thing.Type << '\n';
-		std::cout << thing.Flags << "\n\n";
+		std::cout << thing.type << '\n';
+		std::cout << thing.flags << "\n\n";*/
 
 		map.addThing(thing);
+	}
+
+	map.initPlayer();
+
+	return true;
+}
+
+bool WADLoader::readMapNodes(Map& map)
+{
+	WADReader reader;
+
+	int mapIndex{ findMapIndex(map) };
+
+	if (mapIndex == -1)
+		return false;
+
+	Directory directory{ m_WADDirectories[mapIndex + MapNodes] };
+
+	if (strcmp(directory.lumpName, "NODES") != 0)
+		return false;
+
+	Node node{};
+
+	int sizeOfNode{ sizeof(Node) };
+
+	for (int i{ 0 }; i < directory.lumpSize; i += sizeOfNode)
+	{
+		reader.readNodeData(m_WADData, directory.lumpOffset + i, node);
+
+		/*std::cout << node.startX << '\n';
+		std::cout << node.startY << '\n';
+		std::cout << node.changeX << '\n';
+		std::cout << node.changeY << '\n';
+		std::cout << "{ " << node.rightBox[0] << ", " << node.rightBox[1] << ", " << node.rightBox[2] << ", " << node.rightBox[3] << " }\n";
+		std::cout << "{ " << node.leftBox[0] << ", " << node.leftBox[1] << ", " << node.leftBox[2] << ", " << node.leftBox[3] << " }\n";
+		std::cout << node.rightChild << '\n';
+		std::cout << node.leftChild << "\n\n";*/
+
+		map.addNode(node);
 	}
 
 	return true;

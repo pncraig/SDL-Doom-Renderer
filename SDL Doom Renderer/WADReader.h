@@ -23,7 +23,9 @@ public:
 
 	void readLinedefData(const uint8_t* pWADData, int offset, Linedef& linedef);		// Reads data from PWADData into a linedef
 
-	void readThingData(const uint8_t* pWADData, int offset, Thing& thing);
+	void readThingData(const uint8_t* pWADData, int offset, Thing& thing);				// Reads data from pWADData into a thing
+
+	void readNodeData(const uint8_t* pWADData, int offset, Node& node);					// Reads data from pWADData into a node
 };
 
 #endif

@@ -1,20 +1,25 @@
 #include "DoomEngine.h"
 
-DoomEngine::DoomEngine()
-	:m_RenderWidth{ 320 }, m_RenderHeight{ 200 }, m_IsRunning{ true }, m_WADLoader{ "DOOM.WAD" }
+DoomEngine::DoomEngine(SDL_Renderer* renderer)
+	:m_pRenderer{ renderer }, m_RenderWidth { 320 }, m_RenderHeight{ 200 }, m_IsRunning{ true }, m_WADLoader{ "DOOM.WAD" }
 {
-	m_pMap = new Map("E1M1");
+	
 }
 
 DoomEngine::~DoomEngine()
 {
 	delete m_pMap;
+	delete m_pPlayer;
 }
 
 bool DoomEngine::init()
 {
+	m_pPlayer = new Player(1);
+	m_pMap = new Map(m_pRenderer, "E1M1", m_pPlayer);
+
 	m_WADLoader.load();
 	m_WADLoader.loadMapData(*m_pMap);
+
 	return true;
 }
 
@@ -35,14 +40,13 @@ void DoomEngine::update()
 
 }
 
-void DoomEngine::render(SDL_Renderer* renderTarget)
+void DoomEngine::render()
 {
-	SDL_SetRenderDrawColor(renderTarget, 0, 0, 0, 255);
-	SDL_RenderClear(renderTarget);
+	SDL_SetRenderDrawColor(m_pRenderer, 0, 0, 0, 255);
+	SDL_RenderClear(m_pRenderer);
 
-	m_pMap->renderAutomap(renderTarget);
+	m_pMap->renderAutomap();
 
-	SDL_RenderPresent(renderTarget);
 }
 
 bool DoomEngine::isRunning() { return m_IsRunning; }

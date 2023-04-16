@@ -9,16 +9,16 @@
 struct Header
 {
 	char WADType[5]{};				// Whether the WAD file is an IWAD or a PWAD (IWAD = created by id, PWAD = created by modders)
-	uint32_t DirectoryCount{};		// Number of directories contained in the WAD file
-	uint32_t DirectoryOffset{};		// Number of bytes from the start of the file to the first directory
+	uint32_t directoryCount{};		// Number of directories contained in the WAD file
+	uint32_t directoryOffset{};		// Number of bytes from the start of the file to the first directory
 };
 
 // Associates names of lumps with the data that belongs to them (16 bytes)
 struct Directory
 {
-	uint32_t LumpOffset{};		// Number of bytes from the beginning of the file to the lump
-	uint32_t LumpSize{};		// Size in bytes of the lump
-	char LumpName[9]{};			// Name of the lump (limited to 8 characters)
+	uint32_t lumpOffset{};		// Number of bytes from the beginning of the file to the lump
+	uint32_t lumpSize{};		// Size in bytes of the lump
+	char lumpName[9]{};			// Name of the lump (limited to 8 characters)
 };
 
 // 4 byte structure that holds a point on the map
@@ -31,13 +31,13 @@ struct Vertex
 // 14 byte structure that defines a wall
 struct Linedef
 {
-	int16_t StartVertex{};		// Index of the start vertex in the vertices array
-	int16_t EndVertex{};		// Index of the end vertex
-	int16_t Flags{};
-	int16_t SpecialType{};
-	int16_t SectorTag{};
-	int16_t FrontSidedef{};
-	int16_t BackSidedef{};
+	int16_t startVertex{};		// Index of the start vertex in the vertices array
+	int16_t endVertex{};		// Index of the end vertex
+	int16_t flags{};
+	int16_t specialType{};
+	int16_t sectorTag{};
+	int16_t frontSidedef{};
+	int16_t backSidedef{};
 };
 
 // Linedef flags
@@ -56,9 +56,44 @@ struct Thing
 {
 	int16_t x{};
 	int16_t y{};
-	int16_t a{};
-	int16_t Type{};
-	int16_t Flags{};
+	int16_t a{};		// Angle
+	int16_t type{};		// What kind of thing it is
+	int16_t flags{};
+};
+
+// A 28 byte structure that represents a node in the binary search tree
+// The distinction between left and right is based on the direction of the partition vector
+//					^												O
+//					|												|
+//		Left		|		Right		or			Right			|		Left
+//					|												|
+//					O												V
+struct Node
+{
+	int16_t startX{};		// X-coordinate of partition line start
+	int16_t startY{};		// Y-coordinate of partition line start
+	int16_t changeX{};		// Change in x from the start of the partition line to the end
+	int16_t changeY{};		// Change in y from the start of the partition line to the end
+	int16_t rightBox[4]{};	// Bounding box for the parts of the map on the right side of the partition line. Format is { upperY, lowerY, leftmostX, rightmostX }
+	int16_t leftBox[4]{};	// Bounding box for the parts of the map on the left side of the partition line
+	int16_t rightChild{};	// Index value of the right child node. If the value is negative, that means it represents the index of a subsector and is the last node in that part of the tree
+	int16_t leftChild{};	// Index value of the left child node
+};
+
+struct Subsector
+{
+	int16_t segCount{};
+	int16_t firstSeg{};
+};
+
+struct Seg
+{
+	int16_t startVertex{};
+	int16_t endVertex{};
+	int16_t angle{};
+	int16_t linedef{};
+	int16_t direction{};
+	int16_t offset{};
 };
 
 #endif

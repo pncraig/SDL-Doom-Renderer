@@ -12,8 +12,8 @@ private:
 	int m_WindowWidth{};
 	int m_WindowHeight{};
 
-	SDL_Window* m_Window{};
-	SDL_Renderer* m_RenderTarget{};
+	SDL_Window* m_pWindow{};
+	SDL_Renderer* m_pRenderer{};
 	SDL_Event m_Event{};
 
 	DoomEngine* m_pDoomEngine{};
@@ -26,15 +26,15 @@ public:
 	Game(int width, int height);
 	~Game();
 
-	bool init();
+	bool init();			// Initialize all the variables necessary for rendering using SDL plus the Doom Engine
 
-	bool isRunning();
+	bool isRunning();		// Checks whether the game is still running
 
-	void handleInput();
+	void handleInput();		// Sends input to the Doom Engine
 	
-	void update();
+	void update();			// Calls the Doom Engine update function and also updates the framerate
 	
-	void render();
+	void render();			// Calls the Doom Engine render function and presents the renderer to the screen
 
 	void delay(int ms);
 };

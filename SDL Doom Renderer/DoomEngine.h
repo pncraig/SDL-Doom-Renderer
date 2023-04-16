@@ -5,6 +5,7 @@
 #include "SDL.h"
 #include "WADLoader.h"
 #include "Map.h"
+#include "Player.h"
 
 class DoomEngine
 {
@@ -16,8 +17,11 @@ private:
 
 	WADLoader m_WADLoader;
 	Map* m_pMap{};
+	Player* m_pPlayer{};
+
+	SDL_Renderer* m_pRenderer{};
 public:
-	DoomEngine();
+	DoomEngine(SDL_Renderer* renderer);
 	~DoomEngine();
 
 	bool init();
@@ -28,7 +32,7 @@ public:
 
 	void update();
 
-	void render(SDL_Renderer* renderTarget);
+	void render();
 
 	bool isRunning();
 

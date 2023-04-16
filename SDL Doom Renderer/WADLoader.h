@@ -41,6 +41,7 @@ private:
 	bool readMapVertices(Map& map);		// Reads the map vertices into a vector in the map
 	bool readMapLinedefs(Map& map);		// Reads the map linedefs into a vector in the map
 	bool readMapThings(Map& map);
+	bool readMapNodes(Map& map);
 
 public:
 	WADLoader(std::string fileName);

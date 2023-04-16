@@ -4,12 +4,14 @@
 Game::Game(int width, int height)
 	:m_WindowWidth{ width }, m_WindowHeight{ height }
 {
-	m_pDoomEngine = new DoomEngine();
 }
 
 Game::~Game()
 {
 	delete m_pDoomEngine;
+
+	SDL_DestroyRenderer(m_pRenderer);
+	SDL_DestroyWindow(m_pWindow);
 }
 
 bool Game::init()
@@ -24,30 +26,39 @@ bool Game::init()
 	// SDL_CreateWindow() creates a window
 	//								Window name	  Window X position     Window Y position   width height    flags
 	//									 V			      V						V			   V    V         V
-	m_Window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_WindowWidth, m_WindowHeight, 0);
+	m_pWindow = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_WindowWidth, m_WindowHeight, 0);
 
-	if (m_Window == nullptr)
+	if (m_pWindow == nullptr)
 	{
 		std::cerr << "Error creating window: " << SDL_GetError() << '\n';
 		return false;
 	}
 
-	m_RenderTarget = SDL_CreateRenderer(m_Window, -1, SDL_RENDERER_ACCELERATED);
+	m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED);
 
-	if (m_RenderTarget == nullptr)
+	if (m_pRenderer == nullptr)
 	{
 		std::cerr << "Error creating render target: " << SDL_GetError() << '\n';
 		return false;
 	}
 
+	m_pDoomEngine = new DoomEngine(m_pRenderer);
+
+	if (m_pDoomEngine == nullptr)
+	{
+		std::cerr << "Failed to allocate memory for the Doom Engine\n";
+		return false;
+	}
+
 	// SDL_Texture* frameBuffer{ SDL_CreateTexture(renderTarget, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, m_WindowWidth, m_WindowHeight) };
 
-	if (SDL_RenderSetLogicalSize(m_RenderTarget, m_pDoomEngine->getRenderWidth(), m_pDoomEngine->getRenderHeight()) != 0)
+	if (SDL_RenderSetLogicalSize(m_pRenderer, m_pDoomEngine->getRenderWidth(), m_pDoomEngine->getRenderHeight()) != 0)
 	{
 		std::cerr << "SDL failed to set logical size: " << SDL_GetError() << '\n';
 		return false;
 	}
 
+	// Initialize the Doom Engine
 	if (!m_pDoomEngine->init())
 	{
 		std::cerr << "Error initializing Doom Engine\n";
@@ -102,14 +113,17 @@ void Game::update()
 	int fps{ static_cast<int>(1.0 / m_DeltaTime) };
 
 	std::string str{ std::to_string(fps) };
-	SDL_SetWindowTitle(m_Window, str.c_str());
+	SDL_SetWindowTitle(m_pWindow, str.c_str());
 
 	m_pDoomEngine->update();
 }
 
 void Game::render()
 {
-	m_pDoomEngine->render(m_RenderTarget);
+
+	m_pDoomEngine->render();
+	
+	SDL_RenderPresent(m_pRenderer);
 }
 
 void Game::delay(int ms)
